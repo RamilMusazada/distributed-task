@@ -1,0 +1,4 @@
+<modules>
+    <module>client-service</module>
+    <module>storage-service</module>
+</modules>
