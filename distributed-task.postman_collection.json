@@ -1,0 +1,58 @@
+{
+  "info": {
+    "name": "distributed-task",
+    "description": "Requests for client-service (port 8081), which calls storage-service via OpenFeign.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8081" }
+  ],
+  "item": [
+    {
+      "name": "Hello",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/client/hello",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "client", "hello"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create item",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"  laptop \",\n  \"description\": \"Gaming laptop\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/client/items",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "client", "items"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get all items",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/client/items",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "client", "items"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
