@@ -1,9 +1,9 @@
 server:
-  port: 8082
+  port: 8081
 
 spring:
   application:
-    name: storage-service
+    name: client-service
 
   datasource:
     url: jdbc:postgresql://localhost:5432/storagedb
@@ -13,3 +13,4 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+

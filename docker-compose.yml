@@ -23,8 +23,8 @@ services:
       - "8082:8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/storagedb
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
       postgres:
         condition: service_healthy

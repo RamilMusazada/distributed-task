@@ -17,7 +17,7 @@ public class ClientController {
 
     @GetMapping("/hello")
     public String hello() {
-        return "client-service -> " + storageClient.hello();
+        return storageClient.hello();
     }
 
     @PostMapping("/items")
