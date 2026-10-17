@@ -14,3 +14,44 @@ spring:
     hibernate:
       ddl-auto: update
 
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 2000
+            read-timeout: 2000
+
+storage:
+  service:
+    url: http://localhost:8082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,circuitbreakers
+
+resilience4j:
+  retry:
+    instances:
+      storage:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - com.example.client.StorageServerException
+          - feign.RetryableException
+  circuitbreaker:
+    instances:
+      storage:
+        sliding-window-size: 3
+        minimum-number-of-calls: 3
+        failure-rate-threshold: 100
+        wait-duration-in-open-state: 15s
+        automatic-transition-from-open-to-half-open-enabled: true
+        permitted-number-of-calls-in-half-open-state: 2
+        record-exceptions:
+          - com.example.client.StorageServerException
+          - feign.RetryableException
+        ignore-exceptions:
+          - com.example.client.StorageClientException

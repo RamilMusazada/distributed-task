@@ -2,6 +2,7 @@ package com.example.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -19,4 +20,10 @@ public interface StorageClient {
 
     @GetMapping("/api/storage/items")
     List<Map<String, Object>> getItems();
+
+    @GetMapping("/api/storage/items/{id}")
+    Map<String, Object> getItem(@PathVariable("id") Long id);
+
+    @GetMapping("/api/storage/error/{status}")
+    String error(@PathVariable("status") int status);
 }

@@ -1,55 +1,438 @@
 {
   "info": {
-    "name": "distributed-task",
-    "description": "Requests for client-service (port 8081), which calls storage-service via OpenFeign.",
+    "name": "distributed-task3",
+    "description": "client-service (8081) calls storage-service (8082). Run the requests in order (Collection Runner). Requests 7-12 show retry and the circuit breaker.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8081" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "itemId",
+      "value": ""
+    }
   ],
   "item": [
     {
-      "name": "Hello",
+      "name": "1. Hello",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Answer comes from storage-service\", () => pm.expect(pm.response.text()).to.include(\"Hello from storage-service\"));"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/client/hello",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "client", "hello"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "client",
+            "hello"
+          ]
         }
       },
       "response": []
     },
     {
-      "name": "Create item",
+      "name": "2. Create item",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) {",
+              "    const body = pm.response.json();",
+              "    pm.test(\"Name was trimmed and upper-cased\", () => pm.expect(body.name).to.eql(\"LAPTOP\"));",
+              "    pm.collectionVariables.set(\"itemId\", body.id);",
+              "}"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
-          { "key": "Content-Type", "value": "application/json" }
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
         ],
+        "url": {
+          "raw": "{{baseUrl}}/api/client/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "client",
+            "items"
+          ]
+        },
         "body": {
           "mode": "raw",
           "raw": "{\n  \"name\": \"  laptop \",\n  \"description\": \"Gaming laptop\"\n}",
-          "options": { "raw": { "language": "json" } }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/client/items",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "client", "items"]
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
         }
       },
       "response": []
     },
     {
-      "name": "Get all items",
+      "name": "3. Get all items",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Answer is an array\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
         "url": {
           "raw": "{{baseUrl}}/api/client/items",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "client", "items"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "client",
+            "items"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Get item by id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/client/items/{{itemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "client",
+            "items",
+            "{{itemId}}"
+          ]
+        },
+        "description": "Run request 2 first: it saves the id in the variable itemId."
+      },
+      "response": []
+    },
+    {
+      "name": "5. Error propagation: item not found (404 from storage-service)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "const body = pm.response.json();",
+              "pm.test(\"Error comes from storage-service\", () => pm.expect(body.source).to.eql(\"storage-service\"));",
+              "pm.test(\"Message contains 'not found'\", () => pm.expect(body.message).to.include(\"not found\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/client/items/999999999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "client",
+            "items",
+            "999999999"
+          ]
+        },
+        "description": "storage-service answers 404, client-service gives the same 404 and message. Not retried."
+      },
+      "response": []
+    },
+    {
+      "name": "6. Error propagation: missing name (400 from client-service)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/client/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "client",
+            "items"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"no name\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7. Retry: storage-service fails with 500 -> 502 after 3 attempts",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 502\", () => pm.response.to.have.status(502));",
+              "const body = pm.response.json();",
+              "pm.test(\"Error comes from storage-service\", () => pm.expect(body.source).to.eql(\"storage-service\"));",
+              "pm.test(\"Message contains 'Simulated error 500'\", () => pm.expect(body.message).to.include(\"Simulated error 500\"));",
+              "pm.test(\"It was retried (2 x 500 ms wait)\", () => pm.expect(pm.response.responseTime).to.be.above(900));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/client/fail/500",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "client",
+            "fail",
+            "500"
+          ]
+        },
+        "description": "3 attempts in a row fail, so the circuit breaker opens after this request."
+      },
+      "response": []
+    },
+    {
+      "name": "8. Circuit breaker OPEN: 503 right away",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 503\", () => pm.response.to.have.status(503));",
+              "const body = pm.response.json();",
+              "pm.test(\"Error comes from client-service\", () => pm.expect(body.source).to.eql(\"client-service\"));",
+              "pm.test(\"Message contains 'OPEN'\", () => pm.expect(body.message).to.include(\"OPEN\"));",
+              "pm.test(\"Failed fast, storage-service was not called\", () => pm.expect(pm.response.responseTime).to.be.below(1000));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/client/hello",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "client",
+            "hello"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "9. Wait 16 s: circuit breaker is HALF_OPEN",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "setTimeout(function () {}, 16000);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Circuit breaker is HALF_OPEN\", () => pm.expect(JSON.stringify(pm.response.json())).to.include('\"state\":\"HALF_OPEN\"'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/actuator/circuitbreakers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "actuator",
+            "circuitbreakers"
+          ]
+        },
+        "description": "The circuit stays OPEN for 15 s. The pre-request script waits 16 s."
+      },
+      "response": []
+    },
+    {
+      "name": "10. Trial call 1 (HALF_OPEN)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/client/hello",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "client",
+            "hello"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "11. Trial call 2 (HALF_OPEN)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/client/hello",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "client",
+            "hello"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "12. Circuit breaker is CLOSED again",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Circuit breaker is CLOSED\", () => pm.expect(JSON.stringify(pm.response.json())).to.include('\"state\":\"CLOSED\"'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/actuator/circuitbreakers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "actuator",
+            "circuitbreakers"
+          ]
         }
       },
       "response": []
