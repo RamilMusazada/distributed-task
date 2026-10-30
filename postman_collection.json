@@ -1,19 +1,11 @@
 {
   "info": {
-    "name": "distributed-task3",
+    "_postman_id": "d0e678ed-b0ae-4f15-9954-9476bd8acf49",
+    "name": "distributed-task",
     "description": "client-service (8081) calls storage-service (8082). Run the requests in order (Collection Runner). Requests 7-12 show retry and the circuit breaker.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "41941930"
   },
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:8081"
-    },
-    {
-      "key": "itemId",
-      "value": ""
-    }
-  ],
   "item": [
     {
       "name": "1. Hello",
@@ -72,6 +64,15 @@
             "value": "application/json"
           }
         ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"  laptop \",\n  \"description\": \"Gaming laptop\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
         "url": {
           "raw": "{{baseUrl}}/api/client/items",
           "host": [
@@ -82,15 +83,6 @@
             "client",
             "items"
           ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"name\": \"  laptop \",\n  \"description\": \"Gaming laptop\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
         }
       },
       "response": []
@@ -214,6 +206,15 @@
             "value": "application/json"
           }
         ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"no name\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
         "url": {
           "raw": "{{baseUrl}}/api/client/items",
           "host": [
@@ -224,15 +225,6 @@
             "client",
             "items"
           ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"description\": \"no name\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
         }
       },
       "response": []
@@ -436,6 +428,55 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "13. json-rpc server",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"method\": \"sayHello\",\r\n  \"params\": {\r\n    \"name\": \"Ada\"\r\n  }\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8090/rpc",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8090",
+          "path": [
+            "rpc"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "14. json-rpc emptyname",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": ""
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "itemId",
+      "value": ""
     }
   ]
 }

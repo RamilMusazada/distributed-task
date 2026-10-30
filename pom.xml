@@ -12,5 +12,7 @@
     <modules>
         <module>client-service</module>
         <module>storage-service</module>
+        <module>grpc</module>
+        <module>rpc</module>
     </modules>
 </project>
