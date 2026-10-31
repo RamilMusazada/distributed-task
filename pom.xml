@@ -14,5 +14,7 @@
         <module>storage-service</module>
         <module>grpc</module>
         <module>rpc</module>
+        <module>email-service</module>
+        <module>email-service</module>
     </modules>
 </project>

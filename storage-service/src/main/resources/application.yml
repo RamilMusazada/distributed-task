@@ -6,6 +6,14 @@ server:
 spring:
   application:
     name: storage-service
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  notification:
+    recipient-email: ${NOTIFICATION_RECIPIENT_EMAIL:}
 
   datasource:
     url: jdbc:postgresql://localhost:5432/storagedb

@@ -12,9 +12,11 @@ import java.util.List;
 public class StorageController {
 
     private final ItemRepository repository;
+    private final ItemEventPublisher eventPublisher;
 
-    public StorageController(ItemRepository repository) {
+    public StorageController(ItemRepository repository, ItemEventPublisher eventPublisher) {
         this.repository = repository;
+        this.eventPublisher = eventPublisher;
     }
 
     @GetMapping("/hello")
@@ -24,7 +26,9 @@ public class StorageController {
 
     @PostMapping("/items")
     public Item save(@RequestBody ItemRequest request) {
-        return repository.save(new Item(request.name(), request.description()));
+        Item saved = repository.save(new Item(request.name(), request.description()));
+        eventPublisher.publishItemCreated(saved);
+        return saved;
     }
 
     @GetMapping("/items")
