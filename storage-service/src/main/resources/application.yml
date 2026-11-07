@@ -6,6 +6,7 @@ server:
 spring:
   application:
     name: storage-service
+
   rabbitmq:
     host: localhost
     port: 5672
@@ -23,3 +24,19 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: storage-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.value.default.type: com.example.storage.event.ClientEvent
+        spring.json.use.type.headers: false
+        spring.json.trusted.packages: "*"
+
+app:
+  kafka:
+    topic: client-events
